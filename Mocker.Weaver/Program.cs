@@ -16,12 +16,17 @@ namespace Mocker
         static int Main(string[] args)
         {
             var targetDll = args[0];
-            var paths = new HashSet<string>(args.Skip(1).Select(x => Path.GetFullPath(x)));
+            if (targetDll.StartsWith("@")) // msbuild bundled the arguments.
+            {
+                args = File.ReadAllText(targetDll[1..]).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                targetDll = args[0];
+            }
+
+            var paths = new HashSet<string>(args.Skip(1).Select(Path.GetFullPath));
             var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
             var libPath = Path.Combine(folder, "Mocker.API.dll");
-            var moqLibPath = Path.Combine(folder, "Mocker.Moq.dll");
+            var moqLibPath = paths.Single(s => s.EndsWith("Mocker.API.dll"));
             paths.Add(Path.GetFullPath(targetDll));
-            Debugger.Launch();
             var toWeave = RunWeave(libPath, targetDll, moqLibPath, paths);
             if (toWeave is null) return 1;
             foreach (var (origin, dest) in toWeave)
@@ -33,11 +38,13 @@ namespace Mocker
 
         private static Dictionary<string, string>? RunWeave(string libPath, string dllPath, string moqLibPath, HashSet<string> paths)
         {
-            Environment.CurrentDirectory = Path.GetDirectoryName(dllPath)!;
             using var mockerApi = ModuleDefinition.ReadModule(libPath);
             using var module = ModuleDefinition.ReadModule(dllPath);
             using var moqModule = ModuleDefinition.ReadModule(moqLibPath);
+
+            Environment.CurrentDirectory = Path.GetDirectoryName(dllPath)!;
             var typesToMock = GetMockedTypes(module, ["Moq.Mock`1"]).ToArray();
+
 
 
             var modulesToWeave = new HashSet<ModuleDefinition>();
@@ -250,7 +257,7 @@ namespace Mocker
                 ?? throw new InvalidOperationException($"Parameterless constructor for type '{attributeTypeName}' not found.");
             var attributeConstructorReference = module.ImportReference(attributeConstructor);
             var customAttribute = new CustomAttribute(attributeConstructorReference);
-           
+
             module.Assembly.CustomAttributes.Add(customAttribute);
             return false;
         }

@@ -1,13 +1,9 @@
-﻿namespace Mocked
+﻿namespace Mocked;
+
+public class ClassToMock
 {
-    public class ClassToMock
-    {
-        public bool MethodToMock()
-        {
-            return false;
-        }
+    public bool MethodToMock() => false;
 
-        public bool PropertyToMock => false;
+    public bool PropertyToMock => false;
 
-    }
 }

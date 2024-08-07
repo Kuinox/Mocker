@@ -1,21 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-      <ProjectReference Include="../Mocker.Weaver/Mocker.Weaver.csproj"/>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="$(MSBuildThisFileDirectory)..\Mocker.Weaver\bin\$(Configuration)\net8.0\*.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<PackagePath>tools</PackagePath>
+			<Visible>false</Visible>
+		</None>
+		<None Include="$(OutputPath)\Mocker.API.dll">
+			<Pack>true</Pack>
+			<PackagePath>tools</PackagePath>
+			<Visible>false</Visible>
+		</None>
+		<None Include="$(MSBuildThisFileDirectory)..\Mocker.Weaver\bin\$(Configuration)\net8.0\Mocker.Weaver.runtimeconfig.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<PackagePath>tools</PackagePath>
+			<Visible>false</Visible>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Build\WeaveDependency.targets">
-      <PackagePath>buildTransitive\</PackagePath>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Pack>true</Pack>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.10.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Mocker.API.targets">
+			<PackagePath>buildTransitive</PackagePath>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Pack>true</Pack>
+		</None>
+	</ItemGroup>
 
 </Project>

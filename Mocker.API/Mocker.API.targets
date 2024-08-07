@@ -1,0 +1,15 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<UsingTask TaskName="Mocker.API.MockerWeaver" AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Mocker.API.dll" />
+	<Target Name="ConcatenateReferencesAndRunWeaver" AfterTargets="Build">
+		<PropertyGroup>
+			<!-- Concatenate all reference paths with a space -->
+			<ConcatenatedReferences>@(ReferenceCopyLocalPaths->'$(MSBuildProjectDirectory)\$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)', ' ')</ConcatenatedReferences>
+		</PropertyGroup>
+		<MockerWeaver EntryPointFile="$(TargetPath)"
+					  CopiedDllAllowList="$(ConcatenatedReferences)"
+					  MockerWeaverPath="$(MSBuildThisFileDirectory)../tools/Mocker.Weaver.dll"
+					  ToolPath="$(DotNetHostDirectory)"
+					  ToolExe="$(DotNetHostFileName)"
+				/>
+	</Target>
+</Project>
